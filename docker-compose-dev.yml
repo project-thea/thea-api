@@ -1,16 +1,15 @@
 services:
   thea_django:
-    image: project-thea-image
+    image: project-thea-api
     build: .
-    command: python3 manage.py runserver 0.0.0.0:8000
-    # command: python manage.py makemigrations && python manage.py migrate && python manage.py runserver
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: thea_django
     ports:
       - "8000:8000"
     env_file:
       - .env.dev
     volumes:
-      - .:/code
+      - .:/app
     depends_on:
       - thea_postgres_db
     networks:
@@ -23,6 +22,8 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - thea_postgres_db_vol:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       - thea-network
 

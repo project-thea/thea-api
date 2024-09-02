@@ -1,8 +1,8 @@
-FROM python:3.13.0rc1-bookworm
+FROM python:3.11.9
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-RUN mkdir /code
-WORKDIR /code
-COPY requirements.txt /code/
+RUN mkdir /app
+WORKDIR /app
+COPY requirements.txt /app/
 RUN pip3 install -r requirements.txt
-COPY . /code/
+COPY . /app/
