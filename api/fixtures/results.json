@@ -1,0 +1,38 @@
+[
+    {
+        "model": "api.Result",
+        "pk": "167733a9-aa55-4399-8351-61d69f358e23",
+        "fields": {
+            "user": "167733a9-aa55-4399-8351-61d69f358e23",
+            "result_status": "Negative",
+            "test_id": "167733a9-aa55-4399-8351-61d69f358e23",
+            "test_center": "Kampala Hospital",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    },
+    {
+        "model": "api.Result",
+        "pk": "167733a9-aa55-4399-8351-61d69f358e23",
+        "fields": {
+            "user": "167733a9-aa55-4399-8351-61d69f358e23",
+            "result_status": "Positive",
+            "test_id": "167733a9-aa55-4399-8351-61d69f358e23",
+            "test_center": "Kirombe Health Center IV",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    },
+    {
+        "model": "api.Result",
+        "pk": "167733a9-aa55-4399-8351-61d69f358e23",
+        "fields": {
+            "user": "167733a9-aa55-4399-8351-61d69f358e23",
+            "result_status": "Negative",
+            "test_id": "167733a9-aa55-4399-8351-61d69f358e23",
+            "test_center": "Busia POE Clinic",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    }
+]

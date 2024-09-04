@@ -1,0 +1,35 @@
+[
+    {
+        "model": "api.User",
+        "pk": "167733a9-aa55-4399-8351-61d69f358e23",
+        "fields": {
+            "name": "Okello Gabriel",
+            "email": "gabriel@okello.com",
+            "password": "pbkdf2_sha256$870000$ar4a27h4fUytXHQatOijs5$Thm9y0bzdlELav7gvJJxIHECvtClP/vP1igHK1yNp9s=",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    },
+    {
+        "model": "api.User",
+        "pk": "8b0a407b-f659-4f29-9cd1-5949b46392c9",
+        "fields": {
+            "name": "Ashaba Christine",
+            "email": "christine@ashaba.com",
+            "password": "pbkdf2_sha256$870000$6GRxv3WkioZZ3NUHgngmtq$kgxA8i3C7U+UteyeaLsq8jvAOjxz4hJ1aCCSpV5DdEU=",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    },
+    {
+        "model": "api.User",
+        "pk": "809e4ea8-4eae-48f1-acf6-c3c1e3a648c2",
+        "fields": {
+            "name": "Kimuli Ivan",
+            "email": "ivan@kimuli.com",
+            "password": "pbkdf2_sha256$870000$72XEj1Zx0dyiT5nlsQiWm0$Lsk6yYWXqCelV5UojvHa0atBLpN1j+HJVWndLjPbjoY=",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    }
+]

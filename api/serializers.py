@@ -58,5 +58,5 @@ class HotspotSerializer(serializers.ModelSerializer):
 
 class InfectionRateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Location
-        fields = ['latitude', 'longitude', 'datetime', 'rate']
+        model = InfectionRate
+        fields = ['hotspot', 'date', 'num_of_drivers_exposed', 'num_of_drivers_infected', 'transmission_rate']

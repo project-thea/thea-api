@@ -11,6 +11,8 @@ class User(models.Model):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
     date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -31,6 +33,8 @@ class Location(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -43,8 +47,9 @@ class Test(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     disease_id = models.ForeignKey('Disease', on_delete=models.CASCADE)
-    test_date = models.DateField()
     date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -57,6 +62,8 @@ class Disease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -75,9 +82,11 @@ class Result(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     result_status = models.CharField(max_length=10, choices=RESULT_STATUS_CHOICES)
-    test_date = models.DateField()
+    test_id = models.ForeignKey('Test', on_delete=models.CASCADE)
     date_deleted = models.DateTimeField(null=True, blank=True)
     test_center = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -93,6 +102,8 @@ class Hotspot(models.Model):
     datetime = models.DateTimeField(null=True, blank=True)
     strength = models.IntegerField()
     date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -109,6 +120,8 @@ class HotspotUserMap(models.Model):
     hotspot = models.ForeignKey('Hotspot', on_delete=models.CASCADE)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -125,6 +138,8 @@ class InfectionRate(models.Model):
     num_of_drivers_infected = models.IntegerField()
     transmission_rate = models.DecimalField(max_digits=5, decimal_places=4)
     date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
