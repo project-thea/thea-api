@@ -46,6 +46,10 @@ class Test(models.Model):
     test_date = models.DateField()
     date_deleted = models.DateTimeField(null=True, blank=True)
 
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
+
     def __str__(self):
         return f"Test for Disease ID {self.disease_id} on {self.test_date}"
     
@@ -53,6 +57,13 @@ class Disease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     date_deleted = models.DateTimeField(null=True, blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.name
 
 class Result(models.Model):
     RESULT_STATUS_CHOICES = [
@@ -68,6 +79,10 @@ class Result(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     test_center = models.CharField(max_length=255)
 
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
+
     def __str__(self):
         return f"Result for User ID {self.user_id} on {self.test_date}: {self.result_status}"
 
@@ -75,9 +90,16 @@ class Hotspot(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
-    datetime = models.DateTimeField()
+    datetime = models.DateTimeField(null=True, blank=True)
     strength = models.IntegerField()
     date_deleted = models.DateTimeField(null=True, blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
+
+    def set_datetime(self):
+        self.datetime = timezone.now()
 
     def __str__(self):
         return f"Hotspot at ({self.latitude}, {self.longitude}) on {self.datetime} with strength {self.strength}"
@@ -87,6 +109,10 @@ class HotspotUserMap(models.Model):
     hotspot = models.ForeignKey('Hotspot', on_delete=models.CASCADE)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     date_deleted = models.DateTimeField(null=True, blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
 
     def __str__(self):
         return f"User ID {self.user_id} associated with Hotspot ID {self.hotspot_id}"
@@ -99,6 +125,10 @@ class InfectionRate(models.Model):
     num_of_drivers_infected = models.IntegerField()
     transmission_rate = models.DecimalField(max_digits=5, decimal_places=4)
     date_deleted = models.DateTimeField(null=True, blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
 
     def __str__(self):
         return (f"Infection Rate at Hotspot ID {self.hotspot_id} on {self.date}: "

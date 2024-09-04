@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Location
+from .models import User, Location, Test, Disease, Result, Hotspot, InfectionRate
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,3 +25,38 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class BulkLocationSerializer(serializers.Serializer):
     locations = LocationSerializer(many=True)
+
+class TestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = ['user', 'disease_id', 'test_date']
+
+class DiseaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Disease
+        fields = ['name']
+
+class ResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Result
+        fields = ['user', 'result_status', 'test_date', 'test_center']
+
+class HotspotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hotspot
+        fields = ['latitude', 'longitude', 'datetime', 'strength']
+
+    def create(self, validated_data):
+        hotspot = Hotspot(
+            latitude=validated_data['latitude'],
+            longitude=validated_data['longitude'],
+            strength=validated_data['strength']
+        )
+        hotspot.set_datetime()
+        hotspot.save()
+        return hotspot
+
+class InfectionRateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ['latitude', 'longitude', 'datetime', 'rate']
