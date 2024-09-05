@@ -29,7 +29,7 @@ class BulkLocationSerializer(serializers.Serializer):
 class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
-        fields = ['user', 'disease_id', 'test_date']
+        fields = ['user', 'disease_id']
 
 class DiseaseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,7 +39,7 @@ class DiseaseSerializer(serializers.ModelSerializer):
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = ['user', 'result_status', 'test_date', 'test_center']
+        fields = ['user', 'result_status', 'test_center']
 
 class HotspotSerializer(serializers.ModelSerializer):
     class Meta:
