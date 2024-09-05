@@ -64,17 +64,17 @@ class Migration(migrations.Migration):
             name='modified_at',
             field=models.DateTimeField(auto_now=True),
         ),
-        # migrations.AddField(
-        #     model_name='location',
-        #     name='created_at',
-        #     field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
-        #     preserve_default=False,
-        # ),
-        # migrations.AddField(
-        #     model_name='location',
-        #     name='modified_at',
-        #     field=models.DateTimeField(auto_now=True),
-        # ),
+        migrations.AddField(
+            model_name='location',
+            name='created_at',
+            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='location',
+            name='modified_at',
+            field=models.DateTimeField(auto_now=True),
+        ),
         migrations.AddField(
             model_name='result',
             name='created_at',
@@ -103,15 +103,15 @@ class Migration(migrations.Migration):
             name='modified_at',
             field=models.DateTimeField(auto_now=True),
         ),
-        # migrations.AddField(
-        #     model_name='user',
-        #     name='created_at',
-        #     field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
-        #     preserve_default=False,
-        # ),
-        # migrations.AddField(
-        #     model_name='user',
-        #     name='modified_at',
-        #     field=models.DateTimeField(auto_now=True),
-        # ),
+        migrations.AddField(
+            model_name='user',
+            name='created_at',
+            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='user',
+            name='modified_at',
+            field=models.DateTimeField(auto_now=True),
+        ),
     ]
