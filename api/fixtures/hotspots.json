@@ -1,0 +1,26 @@
+[
+    {
+        "model": "api.Hotspot",
+        "pk": "33f982b-64f2-43b3-8aef-6348e8df40b53",
+        "fields": {
+            "latitude": 123.6,
+            "longitude": 87.9,
+            "datetime": "2024-09-04",
+            "strength": 20,
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    },
+    {
+        "model": "api.Hotspot",
+        "pk": "e47fa4cc-5c0e-4211-8ddb-b995edf6e014",
+        "fields": {
+            "latitude": 132.6,
+            "longitude": 27.9,
+            "datetime": "2024-09-04",
+            "strength": 20,
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    }
+]

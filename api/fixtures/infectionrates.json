@@ -1,0 +1,28 @@
+[
+    {
+        "model": "api.InfectionRate",
+        "pk": "33f982b-64f2-43b3-8aef-6348e8df40b53",
+        "fields": {
+            "hotspot":"e47fa4cc-5c0e-4211-8ddb-b995edf6e014",
+            "date": "2024-09-04",
+            "num_of_drivers_exposed": 20,
+            "num_of_drivers_infected": 12,
+            "transmission_rate": 0.6,
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    },
+    {
+        "model": "api.InfectionRate",
+        "pk": "48a49255-ee82-4c9c-ae6e-a86f069e9f62",
+        "fields": {
+            "hotspot":"e47fa4cc-5c0e-4211-8ddb-b995edf6e014",
+            "date": "2024-09-04",
+            "num_of_drivers_exposed": 20,
+            "num_of_drivers_infected": 12,
+            "transmission_rate": 0.6,
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    }
+]
