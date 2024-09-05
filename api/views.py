@@ -19,6 +19,17 @@ class UserViewSet(viewsets.ModelViewSet):
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.filter(date_deleted__isnull=True)
     serializer_class = LocationSerializer
+    http_method_names = ['get', 'post']
+
+    def list(self, request, *args, **kwargs):
+        # get locations that a particular user has been to
+        user = request.query_params.get('user')
+        if user:
+            queryset = Location.objects.filter(date_deleted__isnull=True, user_id=user)
+        else:
+            return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = LocationSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = BulkLocationSerializer(data=request.data)
@@ -40,6 +51,15 @@ class TestViewSet(viewsets.ModelViewSet):
     queryset = Test.objects.filter(date_deleted__isnull=True)
     serializer_class = TestSerializer
 
+    def list(self, request, *args, **kwargs):
+        user = request.query_params.get('user')
+        if user:
+            queryset = Test.objects.filter(date_deleted__isnull=True, user_id=user)
+        else:
+            return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TestSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.date_deleted = timezone.now()
@@ -59,6 +79,16 @@ class DiseaseViewSet(viewsets.ModelViewSet):
 class ResultViewSet(viewsets.ModelViewSet):
     queryset = Result.objects.filter(date_deleted__isnull=True)
     serializer_class = ResultSerializer
+
+    def list(self, request, *args, **kwargs):
+        user = request.query_params.get('user')
+        if user:
+            queryset = Result.objects.filter(date_deleted__isnull=True, user_id=user)
+        else:
+            return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ResultSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
