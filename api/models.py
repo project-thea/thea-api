@@ -4,8 +4,25 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
-class User(models.Model):
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, name, password=None):
+        if not email:
+            raise ValueError('Users must have an email address')
+        user = self.model(email=self.normalize_email(email), name=name)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, name, password):
+        user = self.create_user(email, name, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+    
+class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
@@ -13,6 +30,11 @@ class User(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name']
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -23,6 +45,10 @@ class User(models.Model):
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
         self.save()
+
+    # @classmethod
+    # def update_last_login(cls, user):
+    #     pass
 
     def __str__(self):
         return self.name
