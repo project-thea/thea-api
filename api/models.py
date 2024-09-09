@@ -61,6 +61,8 @@ class Location(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_location', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_location',null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -76,6 +78,8 @@ class Test(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_test', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_test', null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -90,6 +94,8 @@ class Disease(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_diease', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_disease', null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -113,6 +119,8 @@ class Result(models.Model):
     test_center = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_result', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_result', null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -121,7 +129,7 @@ class Result(models.Model):
     def __str__(self):
         return f"Result for User ID {self.user_id} on {self.test_date}: {self.result_status}"
 
-class Hotspot(models.Model):
+class Hotspot(models.Model):    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
