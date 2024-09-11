@@ -8,14 +8,16 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True},
         }
+    
+    def get():
+        pass
 
     def create(self, validated_data):
-        user = User(
-            name=validated_data['name'],
+        user = User.objects.create_user(
             email=validated_data['email'],
+            name=validated_data['name'],
+            password=validated_data['password']
         )
-        user.set_password(validated_data['password'])
-        user.save()
         return user
     
 class LocationSerializer(serializers.ModelSerializer):

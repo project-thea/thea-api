@@ -1,7 +1,7 @@
 services:
   thea_django:
-    image: project-thea-api
     build: .
+    image: project-thea-api
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: thea_django
     ports:

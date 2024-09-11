@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, LocationViewSet, TestViewSet, DiseaseViewSet, ResultViewSet, HotspotViewSet, InfectionRateViewSet
+from .views import  LocationViewSet, TestViewSet, DiseaseViewSet, ResultViewSet, HotspotViewSet, InfectionRateViewSet
 
 router = DefaultRouter()
-router.register(r'users', UserViewSet)
+# router.register(r'users', UserViewSet)
 router.register(r'locations', LocationViewSet)
 router.register(r'tests', TestViewSet)
 router.register(r'diseases', DiseaseViewSet)

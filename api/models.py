@@ -4,8 +4,25 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
-class User(models.Model):
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, name, password=None):
+        if not email:
+            raise ValueError('Users must have an email address')
+        user = self.model(email=self.normalize_email(email), name=name)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, name, password):
+        user = self.create_user(email, name, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+    
+class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
@@ -13,6 +30,11 @@ class User(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name']
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -23,6 +45,10 @@ class User(models.Model):
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
         self.save()
+
+    # @classmethod
+    # def update_last_login(cls, user):
+    #     pass
 
     def __str__(self):
         return self.name
@@ -35,6 +61,8 @@ class Location(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_location', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_location',null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -50,6 +78,8 @@ class Test(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_test', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_test', null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -64,6 +94,8 @@ class Disease(models.Model):
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_diease', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_disease', null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -87,6 +119,8 @@ class Result(models.Model):
     test_center = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_result', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_result', null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         self.date_deleted = timezone.now()
@@ -95,7 +129,7 @@ class Result(models.Model):
     def __str__(self):
         return f"Result for User ID {self.user_id} on {self.test_date}: {self.result_status}"
 
-class Hotspot(models.Model):
+class Hotspot(models.Model):    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
