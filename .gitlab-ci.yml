@@ -6,17 +6,18 @@ stages:
 
 build:
   stage: build
+  script:
+      - echo "build"
 
-before_script:
+test:
+  stage: test
+  before_script:
   - python --version ; pip --version  # For debugging
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
   - pip install tox
   - pip install -r requirements.txt
-
-test:
-  stage: test
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   script:
