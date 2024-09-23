@@ -1,0 +1,22 @@
+[
+    {
+        "model": "api.HotspotUserMap",
+        "pk": "22f982b-64f2-43b3-8aef-6348e8df40b53",
+        "fields": {
+            "hotspot":"33f982b-64f2-43b3-8aef-6348e8df40b53",
+            "user": "809e4ea8-4eae-48f1-acf6-c3c1e3a648c2",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    },
+    {
+        "model": "api.HotspotUserMap",
+        "pk": "e47fa4cc-5c0e-8811-8ddb-b995edf6e014",
+        "fields": {
+            "hotspot":"e47fa4cc-5c0e-4211-8ddb-b995edf6e014",
+            "user": "809e4ea8-4eae-48f1-acf6-c3c1e3a648c2",
+            "created_at": "2024-09-04 12:16:10.443782+00",
+            "modified_at": "2024-09-04 12:16:10.443782+00"
+        }
+    }
+]

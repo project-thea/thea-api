@@ -1,0 +1,24 @@
+image: python:3.11.9
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+      - echo "build"
+
+test:
+  stage: test
+  before_script:
+  - python --version ; pip --version  # For debugging
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+  - pip install tox
+  - pip install -r requirements.txt
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  script:
+    - tox
