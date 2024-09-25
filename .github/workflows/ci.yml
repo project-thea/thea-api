@@ -1,0 +1,41 @@
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container: python:3.11
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: echo "build"
+
+  test:
+    needs: build
+    runs-on: ubuntu-22.04
+    container: python:3.11
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Install dependencies and run tests
+      run: |
+        python --version
+        pip --version
+        pip install virtualenv
+        virtualenv venv
+        . venv/bin/activate
+        pip install tox
+        which tox # debugging
+        pip install -r requirements.txt
+        tox
