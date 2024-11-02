@@ -22,11 +22,17 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
     
+class UserRole(models.TextChoices):
+    LAB_TECHINICIAN = 'lab_tech', 'Lab_tech'
+    USER = 'user', 'User'
+    ADMIN = 'admin', 'Admin'
+    
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
+    user_role= models.CharField(max_length=15, choices=UserRole.choices, default=UserRole.ADMIN)
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -46,9 +52,33 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.date_deleted = timezone.now()
         self.save()
 
-    # @classmethod
-    # def update_last_login(cls, user):
-    #     pass
+    def __str__(self):
+        return self.name
+
+class Subject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)
+    date_archived = models.DateTimeField(null=True, blank=True)
+    date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name']
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+    
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
 
     def __str__(self):
         return self.name
@@ -57,7 +87,7 @@ class Location(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, null=True)
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -73,7 +103,7 @@ class Location(models.Model):
     
 class Test(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, null=True)
     disease_id = models.ForeignKey('Disease', on_delete=models.CASCADE)
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -112,7 +142,7 @@ class Result(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, null=True)
     result_status = models.CharField(max_length=10, choices=RESULT_STATUS_CHOICES)
     test_id = models.ForeignKey('Test', on_delete=models.CASCADE)
     date_deleted = models.DateTimeField(null=True, blank=True)
@@ -152,7 +182,7 @@ class Hotspot(models.Model):
 class HotspotUserMap(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hotspot = models.ForeignKey('Hotspot', on_delete=models.CASCADE)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, null=True)
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -161,8 +191,8 @@ class HotspotUserMap(models.Model):
         self.date_deleted = timezone.now()
         self.save()
 
-    def __str__(self):
-        return f"User ID {self.user_id} associated with Hotspot ID {self.hotspot_id}"
+    # def __str__(self):
+    #     return f"User ID {self.user_id} associated with Hotspot ID {self.hotspot_id}"
     
 class InfectionRate(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
