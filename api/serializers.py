@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
-        fields = ['id', 'name', 'email', 'password']
+        fields = ['id', 'name', 'email', 'password', 'created_at']
         extra_kwargs = {
             'password': {'write_only': True},
         }

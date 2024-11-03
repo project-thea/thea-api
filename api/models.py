@@ -32,6 +32,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     user_role= models.CharField(max_length=15, choices=UserRole.choices, default=UserRole.ADMIN)
     date_deleted = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -116,7 +118,7 @@ class Test(models.Model):
         self.save()
 
     def __str__(self):
-        return f"Test for Disease ID {self.disease_id} on {self.test_date}"
+        return f"{self.disease_id}"
     
 class Disease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -157,7 +159,7 @@ class Result(models.Model):
         self.save()
 
     def __str__(self):
-        return f"Result for User ID {self.user_id} on {self.test_date}: {self.result_status}"
+        return f"Result for User ID {self.subject}: {self.result_status}"
 
 class Hotspot(models.Model):    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
