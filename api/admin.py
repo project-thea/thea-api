@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Subject, Test, Disease, Result
+from .models import (
+    Subject, 
+    Test, 
+    Disease, 
+    Result, Location)
 
 class SubjectAdmin(admin.ModelAdmin):
     # control which columns appear in the list view
@@ -34,10 +38,8 @@ class SubjectAdmin(admin.ModelAdmin):
     readonly_fields = ('date_archived', 'date_deleted', 'created_at', 'modified_at')
 
 class TestAdmin(admin.ModelAdmin):
-    # control which columns appear in the list view
     list_display = ('disease_id', 'subject')
     
-    # Fields for when adding a user
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -47,14 +49,6 @@ class TestAdmin(admin.ModelAdmin):
             )}
         ),
     )
-    
-    # Fields for editing existing users, grouped in fieldsets
-    # fieldsets = (
-    #     (None, {'fields': ('email', 'password')}),
-    #     ('Personal info', {'fields': ('name',)}),
-    #     ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-    #     ('Important dates', {'fields': ('last_login', 'date_joined')}),
-    # )
 
     readonly_fields = ('created_at', 'modified_at')
 
@@ -89,9 +83,25 @@ class ResultAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ('created_at', 'modified_at')
+
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'latitude', 'longitude', 'subject')
     
+    add_fieldsets = (
+        (None, {
+            # 'classes': ('wide',),
+            'fields': (
+                'subject', 
+                'latitude',
+                'longitude'
+            )}
+        ),
+    )
+
+    readonly_fields = ('created_at', 'modified_at')
 
 admin.site.register(Subject, SubjectAdmin)
 admin.site.register(Test, TestAdmin)
 admin.site.register(Disease, DiseaseAdmin)
 admin.site.register(Result, ResultAdmin)
+admin.site.register(Location, LocationAdmin)

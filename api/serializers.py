@@ -42,7 +42,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ['latitude', 'longitude', 'user']
+        fields = ['latitude', 'longitude', 'subject']
 
 class BulkLocationSerializer(serializers.Serializer):
     locations = LocationSerializer(many=True)

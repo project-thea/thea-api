@@ -1,11 +1,16 @@
+import random
+from datetime import timedelta
+
 from django.utils import timezone
-from django.db.models import F
+from django.db.models import F, Subquery, OuterRef, Count
 from django.core.paginator import Paginator
+from django.db.models.functions import TruncDate
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -143,6 +148,27 @@ class SubjectViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def get_subjects_most_recent_locations(self):
+        latest_locations = Location.objects.filter(
+            created_at=Subquery(
+                Location.objects.filter(
+                    subject=OuterRef('subject')
+                ).order_by('-created_at').values('created_at')[:1]
+            )
+        ).select_related('subject')
+
+        return latest_locations
+    
+    @action(detail=False, methods=['get'], url_path='latest-locations')
+    def get_subjects_recent_locations(self, request):
+        locations = self.get_subjects_most_recent_locations()
+        serializer = LocationSerializer(locations, many=True)
+
+        return Response({
+            'total': locations.count(),
+            'data': serializer.data
+        })
+    
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.filter(date_deleted__isnull=True)
     serializer_class = LocationSerializer
@@ -176,14 +202,56 @@ class LocationViewSet(viewsets.ModelViewSet):
 
 class OverviewView(APIView):
     def get(self, request):
-        stats = [{
+        today = timezone.now().date()
+        week_ago = today - timedelta(days=6)
+
+        # Get subjects count per day
+        subjects_per_day = (
+            Subject.objects
+            .filter(created_at__date__gte=week_ago)
+            .annotate(date=TruncDate('created_at'))
+            .values('date')
+            .annotate(subject_count=Count('id'))
+            .order_by('date')
+        )
+
+        # Get tests count per day
+        tests_per_day = (
+            Test.objects
+            .filter(created_at__date__gte=week_ago)
+            .annotate(date=TruncDate('created_at'))
+            .values('date')
+            .annotate(test_count=Count('id'))
+            .order_by('date')
+        )
+
+        # Create a list of all dates in the range
+        date_range = [(today - timedelta(days=x)) for x in range(6, -1, -1)]
+
+        # Convert querysets to dictionaries for easier lookup
+        subjects_dict = {item['date']: item['subject_count'] for item in subjects_per_day}
+        tests_dict = {item['date']: item['test_count'] for item in tests_per_day}
+
+        # Combine the results
+        weekly_stats = [
+            {
+                'date': date.strftime('%Y-%m-%d'),
+                'day': date.strftime('%A'),
+                'new_subjects': subjects_dict.get(date, 0),
+                'tests_taken': tests_dict.get(date, 0)
+            }
+            for date in date_range
+        ]    
+
+        data = {
             'num_subjects': Subject.objects.filter(date_deleted__isnull=True).count(),
             'num_tests': Test.objects.count(),
             'num_diseases': Disease.objects.count(),
-            'num_users': User.objects.filter(date_deleted__isnull=True).count()
-        }]
+            'num_users': User.objects.filter(date_deleted__isnull=True).count(),
+            'weekly_stats': weekly_stats
+        }
 
-        return Response(stats)
+        return Response(data)
 
 class TheaPagination(PageNumberPagination):
     page_size = 10
