@@ -57,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.name
 
-class Subject(models.Model):
+class Subject(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
@@ -71,6 +71,25 @@ class Subject(models.Model):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
+
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='subject_set',
+        blank=True,
+        verbose_name=('groups'),
+        help_text=(
+            'The groups this subject belongs to. A subject will get all permissions '
+            'granted to each of their groups.'
+        ),
+    )
+
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='subject_set', 
+        blank=True,
+        verbose_name=('user permissions'),
+        help_text=('Specific permissions for this subject.'),
+    )
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)

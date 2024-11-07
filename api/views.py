@@ -1,19 +1,20 @@
-import random
 from datetime import timedelta
 
 from django.utils import timezone
 from django.db.models import F, Subquery, OuterRef, Count
 from django.core.paginator import Paginator
 from django.db.models.functions import TruncDate
+from django.contrib.auth import authenticate
+from django.core.exceptions import PermissionDenied
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, Token
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -41,14 +42,36 @@ class TheaUserTokenObtainPairSerializer(TokenObtainPairSerializer):
 class TheaUserTokenObtainPairView(TokenObtainPairView):
     serializer_class = TheaUserTokenObtainPairSerializer
 
+class SubjectRefreshToken(RefreshToken):
+    @classmethod
+    def for_user(cls, subject):
+        token = cls()
+        return token
+    
 class TheaSubjectTokenObtainPairSerializer(TokenObtainPairSerializer):
-    # TODO; this is not authenticating well at the moment since all the requests
-    # seem to be routed to the User model. Come back to this later!
-    def validate(self, attrs):
-        data = super().validate(attrs)
+    @classmethod
+    def get_token(cls, subject: Subject):
+        return SubjectRefreshToken.for_user(subject)
         
-        data['subject'] = SubjectSerializer(self.user).data
-        return data
+    def validate(self, attrs): 
+        authenticate_kwargs = {
+            self.username_field: attrs[self.username_field],
+            "password": attrs["password"],
+        }
+
+        self.subject = authenticate(**authenticate_kwargs)
+
+        if self.subject:
+            refresh = self.get_token(self.subject)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+            data['subject'] = SubjectSerializer(self.subject).data
+
+            return data
+        
+        raise PermissionDenied("Invalid credentials") # should this be moved to the auth backend? I don't feel so nice about it being placed here!
 
 class TheaSubjectTokenObtainPairView(TokenObtainPairView):
     serializer_class = TheaSubjectTokenObtainPairSerializer
