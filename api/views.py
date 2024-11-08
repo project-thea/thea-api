@@ -19,6 +19,8 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, Bl
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from api.auth.backends import SubjectAuthBackend
+
 from .models import Subject, User, Location, Test, Disease, Result, Hotspot, InfectionRate
 from .serializers import (
     SubjectSerializer,
@@ -59,7 +61,8 @@ class TheaSubjectTokenObtainPairSerializer(TokenObtainPairSerializer):
             "password": attrs["password"],
         }
 
-        self.subject = authenticate(**authenticate_kwargs)
+        subject_auth_backend = SubjectAuthBackend()
+        self.subject = subject_auth_backend.authenticate(**authenticate_kwargs)
 
         if self.subject:
             refresh = self.get_token(self.subject)
@@ -70,8 +73,8 @@ class TheaSubjectTokenObtainPairSerializer(TokenObtainPairSerializer):
             data['subject'] = SubjectSerializer(self.subject).data
 
             return data
-        
-        raise PermissionDenied("Invalid credentials") # should this be moved to the auth backend? I don't feel so nice about it being placed here!
+        else:
+            raise PermissionDenied("Invalid credentials")
 
 class TheaSubjectTokenObtainPairView(TokenObtainPairView):
     serializer_class = TheaSubjectTokenObtainPairSerializer
