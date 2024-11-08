@@ -1,10 +1,19 @@
 from rest_framework import serializers
-from .models import Subject, User, Location, Test, Disease, Result, Hotspot, InfectionRate
-
+from .models import (
+    Subject, 
+    User, 
+    Location, 
+    Test, 
+    Disease, 
+    Result, 
+    Hotspot, 
+    InfectionRate, 
+    UserRole
+)
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'password', 'user_role']
+        fields = ['id', 'name', 'email', 'password']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -35,7 +44,8 @@ class SubjectSerializer(serializers.ModelSerializer):
         subject = Subject.objects.create_user(
             email=validated_data['email'],
             name=validated_data['name'],
-            password=validated_data['password']
+            password=validated_data['password'],
+            user_role=UserRole.SUBJECT
         )
         return subject
     

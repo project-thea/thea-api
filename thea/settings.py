@@ -154,6 +154,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTHENTICATION_BACKENDS = [
-    'api.auth.backends.SubjectAuthBackend',
+    # 'api.auth.backends.SubjectAuthBackend', # disable this for now - may come in handy when we start enabling different auth/register methods for subject roles
     "django.contrib.auth.backends.ModelBackend"
 ]

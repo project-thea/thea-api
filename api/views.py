@@ -4,8 +4,6 @@ from django.utils import timezone
 from django.db.models import F, Subquery, OuterRef, Count
 from django.core.paginator import Paginator
 from django.db.models.functions import TruncDate
-from django.contrib.auth import authenticate
-from django.core.exceptions import PermissionDenied
 
 from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
@@ -19,9 +17,7 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, Bl
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from api.auth.backends import SubjectAuthBackend
-
-from .models import Subject, User, Location, Test, Disease, Result, Hotspot, InfectionRate
+from .models import Subject, User, Location, Test, Disease, Result, Hotspot, InfectionRate, UserRole
 from .serializers import (
     SubjectSerializer,
     UserSerializer,
@@ -36,45 +32,18 @@ from .serializers import (
 class TheaUserTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        
-        # Add custom claims...
+
         data['user'] = UserSerializer(self.user).data
         return data
 
 class TheaUserTokenObtainPairView(TokenObtainPairView):
     serializer_class = TheaUserTokenObtainPairSerializer
-
-class SubjectRefreshToken(RefreshToken):
-    @classmethod
-    def for_user(cls, subject):
-        token = cls()
-        return token
     
 class TheaSubjectTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, subject: Subject):
-        return SubjectRefreshToken.for_user(subject)
-        
-    def validate(self, attrs): 
-        authenticate_kwargs = {
-            self.username_field: attrs[self.username_field],
-            "password": attrs["password"],
-        }
-
-        subject_auth_backend = SubjectAuthBackend()
-        self.subject = subject_auth_backend.authenticate(**authenticate_kwargs)
-
-        if self.subject:
-            refresh = self.get_token(self.subject)
-            data = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-            data['subject'] = SubjectSerializer(self.subject).data
-
-            return data
-        else:
-            raise PermissionDenied("Invalid credentials")
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['subject'] = SubjectSerializer(self.user).data
+        return data
 
 class TheaSubjectTokenObtainPairView(TokenObtainPairView):
     serializer_class = TheaSubjectTokenObtainPairSerializer
@@ -110,8 +79,6 @@ class SubjectRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
-    # i think this view could work for both users and subjects!
-
     def post(self, request):
         try:
             refresh_token = request.data["refresh_token"]
@@ -124,7 +91,7 @@ class LogoutView(APIView):
 
 class SubjectViewSet(viewsets.ModelViewSet):
     serializer_class = SubjectSerializer
-    queryset = Subject.objects.filter(date_deleted__isnull=True)
+    queryset = Subject.objects.filter(date_deleted__isnull=True, user_role=UserRole.SUBJECT)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -202,11 +169,11 @@ class LocationViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         # get locations that a particular user has been to
-        user = request.query_params.get('user')
-        if user:
-            queryset = Location.objects.filter(date_deleted__isnull=True, user_id=user)
+        subject = request.query_params.get('subject')
+        if subject:
+            queryset = Location.objects.filter(date_deleted__isnull=True, subject=subject)
         else:
-            return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'subject is required'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = LocationSerializer(queryset, many=True)
         return Response(serializer.data)
 

@@ -7,11 +7,16 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, name, password=None):
+    def create_user(self, email, name, password=None, user_role=None):
         if not email:
             raise ValueError('Users must have an email address')
+        
         user = self.model(email=self.normalize_email(email), name=name)
         user.set_password(password)
+        
+        if user_role:
+            user.user_role = user_role
+
         user.save(using=self._db)
         return user
 
@@ -26,6 +31,7 @@ class UserRole(models.TextChoices):
     LAB_TECHINICIAN = 'lab_tech', 'Lab_tech'
     USER = 'user', 'User'
     ADMIN = 'admin', 'Admin'
+    SUBJECT = 'subject', 'Subject'
     
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -57,52 +63,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.name
 
-class Subject(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=128)
-    date_archived = models.DateTimeField(null=True, blank=True)
-    date_deleted = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
-
-    objects = CustomUserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
-
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='subject_set',
-        blank=True,
-        verbose_name=('groups'),
-        help_text=(
-            'The groups this subject belongs to. A subject will get all permissions '
-            'granted to each of their groups.'
-        ),
-    )
-
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='subject_set', 
-        blank=True,
-        verbose_name=('user permissions'),
-        help_text=('Specific permissions for this subject.'),
-    )
-
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
-
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password)
-    
-    def delete(self, *args, **kwargs):
-        self.date_deleted = timezone.now()
-        self.save()
-
-    def __str__(self):
-        return self.name
+class Subject(User):
+    class Meta:
+        proxy = True
 
 class Location(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
