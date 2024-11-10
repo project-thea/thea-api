@@ -1,13 +1,17 @@
-name: thea_api_prod
+version: '3.8'
+
+# for the current docker-compose version we use on the server, "name" is not supported
+# and we have to pass this using the "COMPOSE_PROJECT_NAME" env variable
+# name: thea_api_prod
 
 services:
   thea_django:
     build: .
     image: project-thea-api
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn thea.wsgi:application --bind 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn thea.wsgi:application --access-logfile '-' --error-logfile '-' --bind 0.0.0.0:8025"
     container_name: thea_django_prod
     ports:
-      - "8000:8000"
+      - "8025:8025"
     env_file:
       - .env
     volumes:
