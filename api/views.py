@@ -168,7 +168,7 @@ class LocationViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post']
 
     def list(self, request, *args, **kwargs):
-        # get locations that a particular user has been to
+        # get locations of a subject
         subject = request.query_params.get('subject')
         if subject:
             queryset = Location.objects.filter(date_deleted__isnull=True, subject=subject)
