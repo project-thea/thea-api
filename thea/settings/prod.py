@@ -33,7 +33,8 @@ ALLOWED_HOSTS = [
     '10.0.2.2', 
     'localhost', 
     'thea_django', 
-    'testsite.esomelo.com'
+    'testsite.esomelo.com',
+    'demo.project-thea.org'
 ]
 
 
@@ -66,6 +67,9 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
+    'https://testsite.esomelo.com',
+    'http://demo.project-thea.org',
+    'https://demo.project-thea.org'
 ]
 
 ROOT_URLCONF = "thea.urls"
