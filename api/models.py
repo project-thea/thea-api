@@ -7,6 +7,9 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class CustomUserManager(BaseUserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(date_deleted__isnull=True, user_role=UserRole.ADMIN)
+
     def create_user(self, email, name, password=None, user_role=None):
         if not email:
             raise ValueError('Users must have an email address')
@@ -63,7 +66,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.name
 
+class SubjectManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(date_deleted__isnull=True, user_role=UserRole.SUBJECT)
+
 class Subject(User):
+    objects = SubjectManager()
+
     class Meta:
         proxy = True
 

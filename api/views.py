@@ -181,6 +181,10 @@ class LocationViewSet(viewsets.ModelViewSet):
         serializer = BulkLocationSerializer(data=request.data)
         if serializer.is_valid():
             locations_data = serializer.validated_data['locations']
+
+            if len(locations_data) == 0:
+                return Response({'error': 'locations data is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
             Location.objects.bulk_create(
                 [Location(**data) for data in locations_data]
             )
