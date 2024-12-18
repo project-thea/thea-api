@@ -139,6 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=180),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=180),
+    "USER_AUTHENTICATION_RULE": "api.auth.backends.custom_user_auth_rule"
 }
 
 # Internationalization
@@ -164,6 +165,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTHENTICATION_BACKENDS = [
-    # 'api.auth.backends.SubjectAuthBackend', # disable this for now - may come in handy when we start enabling different auth/register methods for subject roles
-    "django.contrib.auth.backends.ModelBackend"
+    'api.auth.backends.TheaUserAuthBackend',
+    'api.auth.backends.TheaSubjectAuthBackend'
 ]

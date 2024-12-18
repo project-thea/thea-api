@@ -31,8 +31,8 @@ from .serializers import (
 )
 class TheaUserTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        self.context['request'].user_role = UserRole.ADMIN
         data = super().validate(attrs)
-
         data['user'] = UserSerializer(self.user).data
         return data
 
@@ -41,6 +41,7 @@ class TheaUserTokenObtainPairView(TokenObtainPairView):
     
 class TheaSubjectTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        self.context['request'].user_role = UserRole.SUBJECT
         data = super().validate(attrs)
         data['subject'] = SubjectSerializer(self.user).data
         return data

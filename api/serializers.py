@@ -41,7 +41,7 @@ class SubjectSerializer(serializers.ModelSerializer):
         pass
 
     def create(self, validated_data):
-        subject = Subject.objects.create_user(
+        subject = Subject.objects.create(
             email=validated_data['email'],
             name=validated_data['name'],
             password=validated_data['password'],
