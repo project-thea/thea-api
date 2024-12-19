@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      run: echo "build"
+      run: echo "build" # can we build an image here and deploy it to a registry????
 
   test:
     needs: build
