@@ -1,11 +1,17 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 
 from rest_framework import status
+from rest_framework.status import HTTP_100_CONTINUE
 from rest_framework.test import APITestCase, APIClient
 
 from rest_framework_simplejwt.tokens import AccessToken
 
-from ..models import User, Location, Disease, Test, Hotspot, Result, HotspotUserMap, InfectionRate, Subject
+from ..models import User, Location, Subject, UserRole
+from ..serializers import SubjectSerializer
+
+
 
 class BaseTest(APITestCase):
     @classmethod
@@ -19,10 +25,10 @@ class BaseTest(APITestCase):
         cls.user4 = User.objects.create(id="4b0a407b-f659-4f29-9cd1-5949b46392c9", name='jack user', email="jack@user.com", password='password', date_deleted="2021-01-01T00:00:00Z")
 
         # create some sample subjects
-        cls.subject1 = Subject.objects.create(id="5b0a407b-f659-4f29-9cd1-5949b46392c9", name='jane subject', email="jane@subject.com", password='password')
-        cls.subject2 = Subject.objects.create(id="6b0a407b-f659-4f29-9cd1-5949b46392c9", name='john subject', email="john@subject.com", password='password')
-        cls.subject3 = Subject.objects.create(id="7b0a407b-f659-4f29-9cd1-5949b46392c9", name='jill subject', email="jill@subject.com", password='password')
-        cls.subject4 = Subject.objects.create(id="8b0a407b-f659-4f29-9cd1-5949b46392c9", name='jack subject', email="jack@subject.com", password='password', date_deleted="2021-01-01T00:00:00Z")
+        cls.subject1 = User.objects.create(user_role=UserRole.SUBJECT, id="5b0a407b-f659-4f29-9cd1-5949b46392c9", name='jane subject', email="jane@subject.com", password='password')
+        cls.subject2 = User.objects.create(user_role=UserRole.SUBJECT, id="6b0a407b-f659-4f29-9cd1-5949b46392c9", name='john subject', email="john@subject.com", password='password')
+        cls.subject3 = User.objects.create(user_role=UserRole.SUBJECT, id="7b0a407b-f659-4f29-9cd1-5949b46392c9", name='jill subject', email="jill@subject.com", password='password')
+        cls.subject4 = User.objects.create(user_role=UserRole.SUBJECT, id="8b0a407b-f659-4f29-9cd1-5949b46392c9", name='jack subject', email="jack@subject.com", password='password', date_deleted="2021-01-01T00:00:00Z")
 
         cls.location1 = Location.objects.create(latitude=1.0, longitude=2.0, subject=cls.subject1)
         cls.location2 = Location.objects.create(latitude=3.0, longitude=5.0, subject=cls.subject1)

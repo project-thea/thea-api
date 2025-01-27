@@ -1,12 +1,11 @@
 import os
-from .prod import *
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from .dev import *
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        
     }
 }
 
