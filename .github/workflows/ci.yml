@@ -30,17 +30,16 @@ jobs:
           ${{ runner.os }}-pip-
     - name: Install dependencies and run tests
       run: |
-        python --version
-        pip --version
-        pip install virtualenv
-        virtualenv venv
-        . venv/bin/activate
+        until docker exec thea_postgres_db pg_isready -U postgres -h localhost; do
+          sleep 1
+        done
+
+    - name: Run tests
+      run: |
+        docker exec thea_postgres_db psql -U postgres -h localhost -c "CREATE DATABASE thea;"
         
-        # pip install tox
-        # which tox # debugging
-        pip install -r requirements.txt
-        # tox
+        # for debugging
+        docker ps -a
+        docker logs thea_django
         
-        # tox seems to be failing for reasons that i cannot figure out.
-        # resort to using the "python manage.py test" command for now!
-        python manage.py test
+        docker exec thea_django python manage.py test
