@@ -5,30 +5,20 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-22.04
-    container: python:3.11
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      run: echo "build" # can we build an image here and deploy it to a registry????
+      run: docker build -t project-thea-api .
 
   test:
     needs: build
     runs-on: ubuntu-22.04
-    container: python:3.11
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - name: Install dependencies and run tests
+    - name: Start containers
+      run: docker compose -f docker-compose-dev.yml up -d
+
+    - name: Wait for PostgreSQL to be ready
       run: |
         until docker exec thea_postgres_db pg_isready -U postgres -h localhost; do
           sleep 1
@@ -40,6 +30,6 @@ jobs:
         
         # for debugging
         docker ps -a
-        docker logs thea_django
+        docker logs thea_django # for debugging...
         
         docker exec thea_django python manage.py test
