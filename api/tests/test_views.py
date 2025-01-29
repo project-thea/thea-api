@@ -1,17 +1,14 @@
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from rest_framework import status
-from rest_framework.status import HTTP_100_CONTINUE
 from rest_framework.test import APITestCase, APIClient
 
 from rest_framework_simplejwt.tokens import AccessToken
 
 from ..models import User, Location, Subject, UserRole
-from ..serializers import SubjectSerializer
-
-
 
 class BaseTest(APITestCase):
     @classmethod
@@ -44,7 +41,7 @@ class BaseTest(APITestCase):
 class UserTests(BaseTest):
     def test_create_user(self):
         payload = {'name': 'newuser', 'email': 'newuser@example.com', 'password': 'password123'}
-        response = self.client.post('/register/user/', payload)
+        response = self.client.post(reverse("user_register"), payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         User = get_user_model()
@@ -52,21 +49,21 @@ class UserTests(BaseTest):
 
         # Test required fields are missing
         bad_payload = {"name": "testuser"} 
-        response = self.client.post('/register/user/', bad_payload)
+        response = self.client.post(reverse("user_register"), bad_payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
          # Test duplicate email
-        response = self.client.post('/register/user/', payload)
+        response = self.client.post(reverse("user_register"), payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 class LocationTests(BaseTest):
     def test_get_all_locations(self):
-        response = self.client.get(f'/api/locations/?subject={self.subject1.id}')
+        response = self.client.get(reverse("location-list"), data={"subject": self.subject1.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
         # should specify a subject id when fetching locations
-        response = self.client.get(f'/api/locations/')
+        response = self.client.get(reverse("location-list"))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_save_location(self):
@@ -76,12 +73,12 @@ class LocationTests(BaseTest):
                 {'latitude': 3.0, 'longitude': 4.0, 'subject': self.subject1.id}
             ]
         }
-        response = self.client.post('/api/locations/', data=data, format='json')
+        response = self.client.post(reverse("location-list"), data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 class OverviewTests(BaseTest):
     def test_get_overview(self):
-        response = self.client.get(f'/api/overview/')
+        response = self.client.get(reverse('overview'))
         data = response.json()
 
         top_level_fields = ['num_subjects', 'num_tests', 'num_users', 'weekly_stats', 'num_diseases']

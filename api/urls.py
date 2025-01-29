@@ -13,6 +13,6 @@ router.register(r'infection-rates', InfectionRateViewSet)
 router.register(r'subjects', SubjectViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router.urls), name='api'),
     path('overview/', OverviewView.as_view(), name='overview')
 ]

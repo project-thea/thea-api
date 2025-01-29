@@ -13,7 +13,6 @@ class Command(BaseCommand):
             'results.json', 
             'hotspots.json',
             'hotspotusermaps.json',
-            # 'infectionrates.json'
         ]
         for fixture in fixtures:
             call_command('loaddata', fixture)
