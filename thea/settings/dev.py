@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-fh9elar%j+=3c-ze)n0!^9&_gqtboe!u)&ksc(#!3v#qmfx&xk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.0.2.2', 'localhost', '192.168.164.198']
 
 
 # Application definition
@@ -43,17 +43,23 @@ INSTALLED_APPS = [
     "rest_framework",
     "api",
     'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist'
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
 ]
 
 ROOT_URLCONF = "thea.urls"
@@ -123,6 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=180),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=180),
+    "USER_AUTHENTICATION_RULE": "api.auth.backends.custom_user_auth_rule"
 }
 
 # Internationalization
@@ -146,3 +153,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTHENTICATION_BACKENDS = [
+    'api.auth.backends.TheaUserAuthBackend',
+    'api.auth.backends.TheaSubjectAuthBackend'
+]

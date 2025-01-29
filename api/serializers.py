@@ -1,6 +1,15 @@
 from rest_framework import serializers
-from .models import User, Location, Test, Disease, Result, Hotspot, InfectionRate
-
+from .models import (
+    Subject, 
+    User, 
+    Location, 
+    Test, 
+    Disease, 
+    Result, 
+    Hotspot, 
+    InfectionRate, 
+    UserRole
+)
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -20,10 +29,30 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
     
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = ['id', 'name', 'email', 'password', 'created_at']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+    
+    def get():
+        pass
+
+    def create(self, validated_data):
+        subject = Subject.objects.create(
+            email=validated_data['email'],
+            name=validated_data['name'],
+            password=validated_data['password'],
+            user_role=UserRole.SUBJECT
+        )
+        return subject
+    
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ['latitude', 'longitude', 'user']
+        fields = ['latitude', 'longitude', 'subject']
 
 class BulkLocationSerializer(serializers.Serializer):
     locations = LocationSerializer(many=True)
