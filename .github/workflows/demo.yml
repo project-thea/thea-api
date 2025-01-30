@@ -16,5 +16,8 @@ jobs:
                 SERVER_USER: ${{ secrets.DEMO_SERVER_USER }}
                 SERVER_IP: ${{ secrets.DEMO_SERVER_IP }}
               run: |
+                mkdir -p ~/.ssh
+                chmod 700 ~/.ssh
+                eval "$(ssh-agent)"
                 echo "$SSH_PRIVATE_KEY" | ssh-add -
-                ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP /home/nangosha/deploy_demo.sh
+                ssh -v -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP /home/nangosha/deploy_demo.sh
