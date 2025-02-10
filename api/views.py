@@ -142,7 +142,19 @@ class SubjectViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-    def get_subjects_most_recent_locations(self):
+    def get_subjects_most_recent_locations(self, subject_id=None, start_date=None, end_date=None):
+        # one of the reasons why i dont filter by date_deleted is that in the clients, i don't
+        # see a scenario where we are deleting locations. in case that happens, then i will
+        # update this method accordingly.
+        if subject_id and start_date and end_date:
+            # Get all locations for specific subject within date range
+            locations = Location.objects.filter(
+                subject_id=subject_id,
+                created_at__range=[start_date, end_date]
+            ).select_related('subject')
+            return locations
+        
+        # Default behavior - get most recent location for each subject
         latest_locations = Location.objects.filter(
             created_at=Subquery(
                 Location.objects.filter(
@@ -155,7 +167,38 @@ class SubjectViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], url_path='latest-locations')
     def get_subjects_recent_locations(self, request):
-        locations = self.get_subjects_most_recent_locations()
+        subject_id = request.query_params.get('subject_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        if subject_id and start_date and end_date:
+            try:
+                # If only date is provided, append default time
+                if len(start_date) == 10:
+                    start_date += ' 00:00:00'
+                if len(end_date) == 10:
+                    end_date += ' 23:59:59'
+                
+                start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+                end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+                locations = self.get_subjects_most_recent_locations(
+                    subject_id=subject_id,
+                    start_date=start_date,
+                    end_date=end_date
+                )
+            except ValueError as ve:
+                return Response(
+                    {
+                        'status': 'error',
+                        'code': 400,
+                        'message': str(ve),
+                        'timestamp': timezone.now().isoformat()
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            locations = self.get_subjects_most_recent_locations()
+
         serializer = LocationSerializer(locations, many=True)
 
         return Response({
@@ -164,6 +207,9 @@ class SubjectViewSet(viewsets.ModelViewSet):
         })
     
 class LocationViewSet(viewsets.ModelViewSet):
+    # TODO; remove this line since it is not secure
+    permission_classes = [AllowAny]
+    
     queryset = Location.objects.filter(date_deleted__isnull=True)
     serializer_class = LocationSerializer
     http_method_names = ['get', 'post']
