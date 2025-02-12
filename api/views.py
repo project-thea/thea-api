@@ -1,9 +1,9 @@
 from datetime import timedelta
 
 from django.utils import timezone
-from django.db.models import F, Subquery, OuterRef, Count
+from django.db.models import F, Subquery, OuterRef, Count, Q
 from django.core.paginator import Paginator
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, Coalesce
 
 from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
@@ -149,18 +149,27 @@ class SubjectViewSet(viewsets.ModelViewSet):
         if subject_id and start_date and end_date:
             # Get all locations for specific subject within date range
             locations = Location.objects.filter(
-                subject_id=subject_id,
-                created_at__range=[start_date, end_date]
-            ).select_related('subject')
+                subject_id=subject_id
+            ).filter(
+                Q(timestamp__isnull=False, timestamp__range=[start_date, end_date]) |
+                Q(timestamp__isnull=True, created_at__range=[start_date, end_date])
+            ).select_related('subject').order_by(
+                Coalesce('timestamp', 'created_at')
+            )
             return locations
         
         # Default behavior - get most recent location for each subject
+        latest_datetime_subquery = Location.objects.filter(
+            subject=OuterRef('subject')
+        ).order_by(
+            Coalesce('timestamp', 'created_at').desc()
+        ).values(
+            latest_datetime=Coalesce('timestamp', 'created_at')
+        )[:1]
+
         latest_locations = Location.objects.filter(
-            created_at=Subquery(
-                Location.objects.filter(
-                    subject=OuterRef('subject')
-                ).order_by('-created_at').values('created_at')[:1]
-            )
+            Q(timestamp__isnull=False, timestamp=Subquery(latest_datetime_subquery)) |
+            Q(timestamp__isnull=True, created_at=Subquery(latest_datetime_subquery))
         ).select_related('subject')
 
         return latest_locations
@@ -183,8 +192,8 @@ class SubjectViewSet(viewsets.ModelViewSet):
                 end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
                 locations = self.get_subjects_most_recent_locations(
                     subject_id=subject_id,
-                    start_date=start_date,
-                    end_date=end_date
+                    start_date=timezone.make_aware(start_date),
+                    end_date=timezone.make_aware(end_date)
                 )
             except ValueError as ve:
                 return Response(
