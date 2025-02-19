@@ -95,6 +95,30 @@ class Location(models.Model):
     def __str__(self):
         return f"Location ({self.latitude}, {self.longitude})"
     
+class SnappedLocation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    original_location = models.ForeignKey('Location', on_delete=models.CASCADE)
+    snapped_latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    snapped_longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    date_deleted = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='created_snapped_location', null=True, blank=True)
+    updated_by = models.ForeignKey('User', on_delete=models.CASCADE, related_name='updated_snapped_location',null=True, blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.date_deleted = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return f"Location ({self.latitude}, {self.longitude})"
+    
+class ProcessingMetadata(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    last_processed_timestamp = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 class Test(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     subject = models.ForeignKey('Subject', on_delete=models.CASCADE, null=True)

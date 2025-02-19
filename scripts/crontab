@@ -1,0 +1,1 @@
+* * * * * /usr/local/bin/python3 /app/scripts/snap_locations.py >> /var/log/cron.log 2>&1

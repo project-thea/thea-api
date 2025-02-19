@@ -7,3 +7,4 @@ PyJWT==2.9.0
 sqlparse==0.5.1
 gunicorn
 django-cors-headers
+requests
