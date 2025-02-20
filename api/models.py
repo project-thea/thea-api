@@ -111,7 +111,7 @@ class SnappedLocation(models.Model):
         self.save()
 
     def __str__(self):
-        return f"Location ({self.latitude}, {self.longitude})"
+        return f"Snapped location: ({self.snapped_latitude}, {self.snapped_longitude})"
     
 class ProcessingMetadata(models.Model):
     id = models.BigAutoField(primary_key=True)
