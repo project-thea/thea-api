@@ -12,6 +12,8 @@ services:
     container_name: thea_django_prod
     ports:
       - "8025:8025"
+    environment:
+      - DJANGO_ENV=production
     env_file:
       - .env
     volumes:
@@ -32,6 +34,16 @@ services:
       - thea_postgres_db_prod_vol:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - thea-network_prod
+
+  thea_valhalla:
+    image: ghcr.io/gis-ops/docker-valhalla/valhalla:latest
+    container_name: thea_valhalla_prod
+    volumes:
+      - $HOME/custom_files:/custom_files
+    ports:
+      - "8002:8002"
     networks:
       - thea-network_prod
 

@@ -12,6 +12,8 @@ services:
     container_name: thea_django
     ports:
       - "8000:8000"
+    environment:
+      - DJANGO_ENV=development
     env_file:
       - .env.dev
     volumes:
