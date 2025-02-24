@@ -47,12 +47,22 @@ def snap_to_road(locations):
     
     # Format locations for Valhalla and convert Decimal to float
     points = [{"lat": float(lat), "lon": float(lon)} for _, lat, lon, _, _ in locations]
-    
+
     payload = {
         "shape": points,
         "costing": "auto",
         "shape_match": "map_snap",
-        "filters": {"attributes": ["edge.way_id", "matched.point", "matched.type", "matched.edge_index"]},
+        "filters": {
+            "attributes": [
+                "edge.way_id",
+                "matched.point",
+                "matched.type",
+                "matched.edge_index"
+            ]
+        },
+        "trace_options": {
+            "max_distance": 50000000  # 50,000,000 meters
+        }
     }
     
     try:
