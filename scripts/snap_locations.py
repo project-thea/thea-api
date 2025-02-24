@@ -7,7 +7,7 @@ from datetime import datetime
 
 def get_db_connection():
     return psycopg2.connect(
-        database=os.environ.get('POSTGRES_DATABASE'),
+        database=os.environ.get('POSTGRES_DB'),
         user=os.environ.get('POSTGRES_USER'),
         password=os.environ.get('POSTGRES_PASSWORD'),
         host='thea_postgres_db'  # service name from docker-compose

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load just the environment variables we need from Docker
-export $(grep -zE '^(POSTGRES_DATABASE|POSTGRES_USER|POSTGRES_PASSWORD|DJANGO_ENV)=' /proc/1/environ | tr '\0' '\n')
+export $(grep -zE '^(POSTGRES_DB|POSTGRES_USER|POSTGRES_PASSWORD|DJANGO_ENV)=' /proc/1/environ | tr '\0' '\n')
 
 # Print the environment variables - for debugging
 env
