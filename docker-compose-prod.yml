@@ -8,7 +8,16 @@ services:
   thea_django:
     build: .
     image: project-thea-api
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn thea.wsgi:application --access-logfile '-' --error-logfile '-' --bind 0.0.0.0:8025"
+    command: >
+      bash -c "
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      service cron start &&
+      gunicorn thea.wsgi:application
+      --access-logfile '-'
+      --error-logfile '-'
+      --bind 0.0.0.0:8025
+      "
     container_name: thea_django_prod
     ports:
       - "8025:8025"
