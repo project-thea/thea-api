@@ -60,9 +60,6 @@ def snap_to_road(locations):
                 "matched.edge_index"
             ]
         },
-        "trace_options": {
-            "max_distance": 50000000  # 50,000,000 meters
-        }
     }
     
     try:
