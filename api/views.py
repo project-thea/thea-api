@@ -17,8 +17,21 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, Bl
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Subject, User, Location, Test, Disease, Result, Hotspot, InfectionRate, UserRole
+from .models import (
+    Subject,
+    User,
+    Location,
+    Test,
+    Disease,
+    Result,
+    Hotspot,
+    InfectionRate,
+    UserRole,
+    SnappedLocation
+)
+
 from .serializers import (
+    SnappedLocationSerializer,
     SubjectSerializer,
     UserSerializer,
     LocationSerializer,
@@ -142,7 +155,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-    def get_subjects_most_recent_locations(self, subject_id=None, start_date=None, end_date=None):
+    def get_subjects_most_recent_locations_coarse(self, subject_id=None, start_date=None, end_date=None):
         # one of the reasons why i dont filter by date_deleted is that in the clients, i don't
         # see a scenario where we are deleting locations. in case that happens, then i will
         # update this method accordingly.
@@ -173,12 +186,56 @@ class SubjectViewSet(viewsets.ModelViewSet):
         ).select_related('subject')
 
         return latest_locations
+
+    def get_subjects_most_recent_locations_snapped(self, subject_id=None, start_date=None, end_date=None):
+        if subject_id and start_date and end_date:
+            locations = (
+                SnappedLocation.objects
+                .select_related('original_location')
+                .filter(
+                    Q(original_location__timestamp__isnull=False, original_location__timestamp__range=[start_date, end_date]) | 
+                    Q(original_location__timestamp__isnull=True, original_location__created_at__range=[start_date, end_date]),
+                    original_location__subject=subject_id
+                )
+                .order_by(Coalesce('original_location__timestamp', 'original_location__created_at'))
+            )
+
+            return locations
+            
+        # Default behavior - get most recent snapped location for each subject
+        most_recent_snapped = (
+            SnappedLocation.objects
+            .select_related('original_location__subject')
+            .filter(
+                original_location__id=Subquery(
+                    Location.objects
+                    .filter(subject=OuterRef('original_location__subject'))
+                    .order_by(Coalesce('timestamp', 'created_at').desc())
+                    .values('id')[:1]
+                )
+            )
+        )
+
+        return most_recent_snapped
+
+    def get_subjects_most_recent_locations(self, type, subject_id=None, start_date=None, end_date=None):
+        if type == 'coarse':
+            return self.get_subjects_most_recent_locations_coarse(subject_id, start_date, end_date)
+        
+        return self.get_subjects_most_recent_locations_snapped(subject_id, start_date, end_date)
     
     @action(detail=False, methods=['get'], url_path='latest-locations')
     def get_subjects_recent_locations(self, request):
         subject_id = request.query_params.get('subject_id')
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
+        locations_type = request.query_params.get('type')
+
+        if not locations_type:
+            locations_type = 'coarse'
+            serializer = LocationSerializer
+        else:
+            serializer = SnappedLocationSerializer
 
         if subject_id and start_date and end_date:
             try:
@@ -191,6 +248,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
                 start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
                 end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
                 locations = self.get_subjects_most_recent_locations(
+                    type=locations_type,
                     subject_id=subject_id,
                     start_date=timezone.make_aware(start_date),
                     end_date=timezone.make_aware(end_date)
@@ -206,13 +264,13 @@ class SubjectViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         else:
-            locations = self.get_subjects_most_recent_locations()
+            locations = self.get_subjects_most_recent_locations(type=locations_type)
 
-        serializer = LocationSerializer(locations, many=True)
+        _serializer = serializer(locations, many=True)
 
         return Response({
             'total': locations.count(),
-            'data': serializer.data
+            'data': _serializer.data
         })
     
 class LocationViewSet(viewsets.ModelViewSet):
