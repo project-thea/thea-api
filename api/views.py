@@ -193,10 +193,11 @@ class SubjectViewSet(viewsets.ModelViewSet):
                 SnappedLocation.objects
                 .select_related('original_location')
                 .filter(
-                    original_location__subject=subject_id,
-                    original_location__timestamp__range=[start_date, end_date]
+                    Q(original_location__timestamp__isnull=False, original_location__timestamp__range=[start_date, end_date]) | 
+                    Q(original_location__timestamp__isnull=True, original_location__created_at__range=[start_date, end_date]),
+                    original_location__subject=subject_id
                 )
-                .order_by('original_location__timestamp')
+                .order_by(Coalesce('original_location__timestamp', 'original_location__created_at'))
             )
 
             return locations
@@ -209,7 +210,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
                 original_location__id=Subquery(
                     Location.objects
                     .filter(subject=OuterRef('original_location__subject'))
-                    .order_by('-timestamp')
+                    .order_by(Coalesce('timestamp', 'created_at').desc())
                     .values('id')[:1]
                 )
             )
