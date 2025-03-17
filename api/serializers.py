@@ -8,7 +8,8 @@ from .models import (
     Result, 
     Hotspot, 
     InfectionRate, 
-    UserRole
+    UserRole,
+    SnappedLocation
 )
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,10 +53,15 @@ class SubjectSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ['latitude', 'longitude', 'subject']
+        fields = ['latitude', 'longitude', 'subject', 'timestamp']
 
 class BulkLocationSerializer(serializers.Serializer):
     locations = LocationSerializer(many=True)
+
+class SnappedLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SnappedLocation
+        fields = ['snapped_latitude', 'snapped_longitude']
 
 class TestSerializer(serializers.ModelSerializer):
     class Meta:

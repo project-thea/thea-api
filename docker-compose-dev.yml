@@ -2,10 +2,18 @@ services:
   thea_django:
     build: .
     image: project-thea-api
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: >
+      bash -c "
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      service cron start &&
+      python manage.py runserver 0.0.0.0:8000
+      "
     container_name: thea_django
     ports:
       - "8000:8000"
+    environment:
+      - DJANGO_ENV=development
     env_file:
       - .env.dev
     volumes:
@@ -26,6 +34,16 @@ services:
       - thea_postgres_db_vol:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - thea-network
+
+  thea_valhalla:
+    image: ghcr.io/gis-ops/docker-valhalla/valhalla:latest
+    container_name: thea_valhalla
+    volumes:
+      - $HOME/valhalla_custom_files:/custom_files # match this to wherever you keep your custom files
+    ports:
+      - "8002:8002"
     networks:
       - thea-network
 
